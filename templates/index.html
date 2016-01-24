@@ -1,0 +1,18 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+        <title>Zoopla Property Listing</title>
+    </head>
+    <body>
+        <h1>Zoopla Property Listing</h1>
+
+        {% for property in listing.properties recursive %}
+            <h2>
+                {{ property.name }}
+            </h2>
+            <p>
+                {{ property.description }}
+            </p>
+        {% endfor %}
+    </body>
+</html>
