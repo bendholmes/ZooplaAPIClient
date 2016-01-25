@@ -2,11 +2,9 @@ import abc
 import json
 import requests
 
-from sqlalchemy.exc import OperationalError
-
 from zoopla import constants
 from zoopla import utils
-from zoopla.zoopla import DB
+
 
 
 class Endpoint(object):
@@ -23,49 +21,6 @@ class Endpoint(object):
 	@property
 	def url(self):
 		return "{base}{path}.json".format(base=constants.BASE_URL, path=self.PATH)
-
-	def getExistingObject(self, objectType, id):
-		try:
-			with DB.session.no_autoflush:
-				return objectType.query.filter_by(id=id).first()
-		except OperationalError, oe:
-			print "Error loading existing {objectType} with id {id}: {exception}".format(
-				objectType=objectType,
-				id=id,
-				exception=oe
-			)
-		return None
-
-	def _map(self, objectType, data, map, idField='id'):
-		# If the data contains an id, check it doesn't already exist
-		if idField in data:
-			maybeExistingObject = self.getExistingObject(objectType, data[idField])
-			if maybeExistingObject:
-				return maybeExistingObject
-
-		obj = objectType()
-		for key, value in data.iteritems():
-			key = map.get(key, key)
-
-			if hasattr(obj, key):
-				setattr(obj, key, value)
-			else:
-				# TODO: Store in HSTORE
-				pass
-
-		DB.session.add(obj)
-		return obj
-
-	def map(self, objectType, data, map=None, idField=None):
-		if not map:
-			map = {}
-
-		if isinstance(data, list):
-			objs = []
-			for objData in data:
-				objs.append(self._map(objectType, objData, map, idField=idField))
-			return objs
-		return self._map(objectType, data, map, idField=idField)
 
 	def get_params_from_locals(self, locals):
 		return locals.update(locals.pop('kwargs'))

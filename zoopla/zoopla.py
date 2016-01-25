@@ -1,6 +1,8 @@
-DB = None
+from flask.ext.sqlalchemy import SQLAlchemy
 
-class Zoopla(object):
-	def __init__(self):
-		from api import listings
-		self.listings = listings.Listings()
+
+# Create a DB handle from the app
+DB = SQLAlchemy()
+
+from service.listing_service import ListingService
+LISTING_SERVICE = ListingService()
